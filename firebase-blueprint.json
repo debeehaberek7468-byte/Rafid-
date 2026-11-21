@@ -1,0 +1,172 @@
+{
+  "entities": {
+    "FavoriteItem": {
+      "title": "FavoriteItem",
+      "description": "A bookmarked physics definition, reasoning explanation, law, or solved problem saved by a student.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated student UID matching request.auth.uid."
+        },
+        "itemId": {
+          "type": "string",
+          "description": "Curriculum item identifier (also used as document ID)."
+        },
+        "itemType": {
+          "type": "string",
+          "enum": ["DEFINITION", "REASONING", "LAW", "PROBLEM"],
+          "description": "Category of the bookmarked curriculum item."
+        },
+        "chapterNumber": {
+          "type": "integer",
+          "description": "Chapter number (1 to 9) in Iraqi 3rd Intermediate Physics."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short title or question prompt."
+        },
+        "content": {
+          "type": "string",
+          "description": "Full definition, explanation, formula, or solution."
+        },
+        "extraNote": {
+          "type": "string",
+          "description": "Optional supplementary detail or units note."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "itemId",
+        "itemType",
+        "chapterNumber",
+        "title",
+        "content",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StudyNote": {
+      "title": "StudyNote",
+      "description": "A personal physics revision note authored by the student.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated student UID matching request.auth.uid."
+        },
+        "title": {
+          "type": "string",
+          "description": "Note heading."
+        },
+        "body": {
+          "type": "string",
+          "description": "Detailed note content."
+        },
+        "chapterNumber": {
+          "type": "integer",
+          "description": "Chapter number (0 for general, 1 to 9 for chapters)."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["SUMMARY", "LAW", "EXAM_TIP", "REMINDER"],
+          "description": "Classification tag for quick exam review."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "body",
+        "chapterNumber",
+        "category",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "QuizResult": {
+      "title": "QuizResult",
+      "description": "Recorded score and elapsed time for a chapter or ministerial physics quiz.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Authenticated student UID matching request.auth.uid."
+        },
+        "quizTitle": {
+          "type": "string",
+          "description": "Arabic quiz title."
+        },
+        "chapterNumber": {
+          "type": "integer",
+          "description": "Chapter number (1..9) or 0 for comprehensive ministerial exam."
+        },
+        "score": {
+          "type": "integer",
+          "description": "Number of correct answers."
+        },
+        "totalQuestions": {
+          "type": "integer",
+          "description": "Total number of questions in the quiz."
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "description": "Elapsed seconds taken to complete the quiz."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp()."
+        }
+      },
+      "required": [
+        "userId",
+        "quizTitle",
+        "chapterNumber",
+        "score",
+        "totalQuestions",
+        "durationSeconds",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/favorites/{favoriteId}": {
+      "schema": {
+        "$ref": "#/entities/FavoriteItem"
+      },
+      "description": "Per-student bookmarked definitions, reasonings, laws, and solved problems."
+    },
+    "/users/{userId}/notes/{noteId}": {
+      "schema": {
+        "$ref": "#/entities/StudyNote"
+      },
+      "description": "Per-student personal study notes for pre-exam revision."
+    },
+    "/users/{userId}/quizResults/{resultId}": {
+      "schema": {
+        "$ref": "#/entities/QuizResult"
+      },
+      "description": "Per-student saved smart quiz and ministerial exam attempts."
+    }
+  }
+}

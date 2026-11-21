@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">فيزياء الأستاذ رافد</string>
+    <string name="professor_full_title">الأستاذ رافد فيصل</string>
+    <string name="subject_subtitle">فيزياء الثالث المتوسط - المنهج العراقي</string>
+    <string name="motto_path_to_100">طريقك نحو الـ 100 في الفيزياء</string>
+    <string name="nav_home">الرئيسية</string>
+    <string name="nav_laws">بنك القوانين</string>
+    <string name="nav_quizzes">الاختبارات</string>
+    <string name="nav_saved">المفضلة والملاحظات</string>
+    <string name="search_placeholder">ابحث عن تعريف، تعليل، قانون، أو مسألة...</string>
+    <string name="sign_in_with_google">تسجيل الدخول بحساب Google</string>
+    <string name="sign_in_subtitle">سجّل دخولك لحفظ المفضلة والملاحظات ونتائج اختباراتك سحابياً</string>
+    <string name="ministerial_tips_title">نصائح الأستاذ رافد للامتحان الوزاري</string>
+    <string name="about_professor_title">حول الأستاذ رافد فيصل</string>
+    <string name="telegram_channel">قناة التيليجرام</string>
+    <string name="tiktok_account">حساب التيك توك</string>
+    <string name="sign_out">تسجيل الخروج</string>
+</resources>

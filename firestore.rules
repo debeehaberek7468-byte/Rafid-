@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidFavorite(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.itemId is string &&
+             data.itemId.size() >= 1 &&
+             data.itemId.size() <= 128 &&
+             data.itemType is string &&
+             data.itemType in ['DEFINITION', 'REASONING', 'LAW', 'PROBLEM'] &&
+             data.chapterNumber is int &&
+             data.chapterNumber >= 1 &&
+             data.chapterNumber <= 9 &&
+             data.title is string &&
+             data.title.size() >= 1 &&
+             data.title.size() <= 200 &&
+             data.content is string &&
+             data.content.size() >= 1 &&
+             data.content.size() <= 2000 &&
+             (!('extraNote' in data) || (data.extraNote is string && data.extraNote.size() <= 500)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidNote(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.title is string &&
+             data.title.size() >= 1 &&
+             data.title.size() <= 120 &&
+             data.body is string &&
+             data.body.size() >= 1 &&
+             data.body.size() <= 2000 &&
+             data.chapterNumber is int &&
+             data.chapterNumber >= 0 &&
+             data.chapterNumber <= 9 &&
+             data.category is string &&
+             data.category in ['SUMMARY', 'LAW', 'EXAM_TIP', 'REMINDER'] &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidQuizResult(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.quizTitle is string &&
+             data.quizTitle.size() >= 1 &&
+             data.quizTitle.size() <= 150 &&
+             data.chapterNumber is int &&
+             data.chapterNumber >= 0 &&
+             data.chapterNumber <= 9 &&
+             data.totalQuestions is int &&
+             data.totalQuestions >= 1 &&
+             data.totalQuestions <= 100 &&
+             data.score is int &&
+             data.score >= 0 &&
+             data.score <= data.totalQuestions &&
+             data.durationSeconds is int &&
+             data.durationSeconds >= 0 &&
+             data.durationSeconds <= 7200 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time;
+    }
+
+    match /users/{userId}/favorites/{favoriteId} {
+      allow get: if isOwner(userId) && isValidId(favoriteId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(favoriteId) &&
+                       incoming().keys().hasAll(['userId', 'itemId', 'itemType', 'chapterNumber', 'title', 'content', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'itemId', 'itemType', 'chapterNumber', 'title', 'content', 'extraNote', 'createdAt', 'updatedAt']) &&
+                       isValidFavorite(incoming(), userId);
+      allow update: if isOwner(userId) &&
+                       isValidId(favoriteId) &&
+                       isValidFavorite(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().itemId == existing().itemId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'extraNote', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(favoriteId);
+    }
+
+    match /users/{userId}/notes/{noteId} {
+      allow get: if isOwner(userId) && isValidId(noteId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(noteId) &&
+                       incoming().keys().hasAll(['userId', 'title', 'body', 'chapterNumber', 'category', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'body', 'chapterNumber', 'category', 'createdAt', 'updatedAt']) &&
+                       isValidNote(incoming(), userId);
+      allow update: if isOwner(userId) &&
+                       isValidId(noteId) &&
+                       isValidNote(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'body', 'chapterNumber', 'category', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(noteId);
+    }
+
+    match /users/{userId}/quizResults/{resultId} {
+      allow get: if isOwner(userId) && isValidId(resultId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) &&
+                       isValidId(resultId) &&
+                       incoming().keys().hasAll(['userId', 'quizTitle', 'chapterNumber', 'score', 'totalQuestions', 'durationSeconds', 'createdAt']) &&
+                       incoming().keys().hasOnly(['userId', 'quizTitle', 'chapterNumber', 'score', 'totalQuestions', 'durationSeconds', 'createdAt']) &&
+                       isValidQuizResult(incoming(), userId);
+      allow update: if false;
+      allow delete: if isOwner(userId) && isValidId(resultId);
+    }
+  }
+}
